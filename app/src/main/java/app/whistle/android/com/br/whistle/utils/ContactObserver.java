@@ -2,21 +2,16 @@ package app.whistle.android.com.br.whistle.utils;
 
 import android.content.Context;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
-import android.provider.ContactsContract;
 import android.util.Log;
-
+import com.brns.whistle.backend.protocol.vo.entity.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import app.whistle.android.com.br.whistle.auxiliary.ContactMobileVO;
 import app.whistle.android.com.br.whistle.control.ControlerFactoryMethod;
 import app.whistle.android.com.br.whistle.entity.Contact;
 import app.whistle.android.com.br.whistle.entity.User;
-import br.com.brns.whistle.protocol.vo.entity.ContactVO;
-import br.com.brns.whistle.protocol.vo.entity.UserVO;
 
 /**
  * Created by rafael on 27/03/2016.

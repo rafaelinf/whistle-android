@@ -27,10 +27,7 @@ import app.whistle.android.com.br.whistle.R;
 import app.whistle.android.com.br.whistle.control.ControlerFactoryMethod;
 import app.whistle.android.com.br.whistle.entity.User;
 import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
-import app.whistle.android.com.br.whistle.utils.WhistleImage;
 import app.whistle.android.com.br.whistle.utils.WhistleUtils;
-import br.com.brns.whistle.protocol.vo.rest.ReturnRSVO;
-import br.com.brns.whistle.protocol.vo.rest.TypeReturnRSVO;
 
 /**
  * Created by rafael on 03/03/2016.
@@ -96,7 +93,7 @@ public class ProfileActivity extends AppCompatActivity {
             txtName.setText(user.getName());
 
             txtNumber = (TextView) findViewById(R.id.txtNumber);
-            txtNumber.setText(user.getNumber());
+            txtNumber.setText(user.getCodecountry() + " " + user.getPrefix() + " " + user.getNumber());
 
             txtEmail = (TextView) findViewById(R.id.txtEmail);
             txtEmail.setText(user.getEmail());
@@ -173,7 +170,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    private final class UploadImageProfile extends AsyncTask<Bitmap, Void, ReturnRSVO> {
+    private final class UploadImageProfile extends AsyncTask<Bitmap, Void, Boolean> {
         private ProgressDialog dialog;
         private Context context;
 
@@ -187,18 +184,18 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         @Override
-        protected ReturnRSVO doInBackground(Bitmap... bitmap) {
+        protected Boolean doInBackground(Bitmap... bitmap) {
             return ControlerFactoryMethod.getUserControler(context).editImageProfile(bitmap[0]);
         }
 
         @Override
-        protected void onPostExecute(ReturnRSVO returnRSVO) {
+        protected void onPostExecute(Boolean result) {
             dialog.dismiss();
-            refreshImage(returnRSVO);
+            refreshImage(result);
         }
     }
 
-    public void refreshImage(ReturnRSVO returnRSVO){
+    public void refreshImage(boolean result){
         try {
 
             User user = ControlerFactoryMethod.getUserControler(getBaseContext()).findUser();
@@ -208,10 +205,11 @@ public class ProfileActivity extends AppCompatActivity {
                         .into(imgProfile);
             }
 
-            if(returnRSVO != null && returnRSVO.getMsg().equals(TypeReturnRSVO.OK)){
+            if(result){
                 Toast.makeText(this, R.string.msgTheImageSuccessfullyChanged, Toast.LENGTH_SHORT).show();
+
             }else{
-                Toast.makeText(this, returnRSVO.getErrorRSVO().getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.msg_couldNotChangeImage, Toast.LENGTH_SHORT).show();
             }
 
         }catch (Exception e){

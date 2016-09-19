@@ -5,18 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import com.brns.whistle.backend.protocol.auxiliary.*;
+import com.brns.whistle.backend.protocol.vo.entity.*;
 import com.google.gson.*;
-import org.json.JSONObject;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.ConsoleHandler;
-
 import app.whistle.android.com.br.whistle.auxiliary.ContactMobileVO;
 import app.whistle.android.com.br.whistle.auxiliary.JsonResponse;
 import app.whistle.android.com.br.whistle.database.DatabaseManager;
@@ -24,12 +18,9 @@ import app.whistle.android.com.br.whistle.database.WhistleBD;
 import app.whistle.android.com.br.whistle.entity.Contact;
 import app.whistle.android.com.br.whistle.entity.User;
 import app.whistle.android.com.br.whistle.utils.WhistleContact;
+import app.whistle.android.com.br.whistle.utils.WhistleGsonBuilder;
 import app.whistle.android.com.br.whistle.utils.WhistleJson;
 import app.whistle.android.com.br.whistle.utils.WhistleUtils;
-import br.com.brns.whistle.protocol.auxiliary.ContactAux;
-import br.com.brns.whistle.protocol.vo.entity.*;
-import br.com.brns.whistle.protocol.vo.rest.ReturnRSVO;
-import br.com.brns.whistle.protocol.vo.rest.TypeReturnRSVO;
 
 /**
  * Created by rafael on 04/03/2016.
@@ -79,57 +70,53 @@ public class ContactControler {
             ct.setConame(c.getName());
             ct.setConumber(c.getNumber());
 
-            Gson gson = new Gson();
+            Gson gson = WhistleGsonBuilder.timestampToDate();
             String jsonPost = gson.toJson(ct);
 
-            JsonResponse jsonResponse = WhistleJson.sendPost___("contact", "saveContact", jsonPost);
-
-            //HttpURLConnection response = WhistleJson.sendPost_("contact", "saveContact", jsonPost);
-            //Log.i(LOG_CLASS, "response.getResponseCode()" + response.getResponseCode());
-
+            JsonResponse jsonResponse = WhistleJson.sendPost("contact", "saveContact", jsonPost);
             if(jsonResponse.getStatus() == 200){
 
-                Contact contactExist = findContactByNumber(ct.getConumber());
-                if(contactExist != null) {
+                if(jsonResponse.getJsonString() != null && !jsonResponse.getJsonString().equals("")){
 
-                    if(jsonResponse.getJsonString() != null && !jsonResponse.getJsonString().equals("")){
+                    Contact contactExist = findContactByNumber(ct.getConumber());
+                    if(contactExist != null) {
 
-                    }
+                        ContactVO contactVO = gson.fromJson(jsonResponse.getJsonString(), ContactVO.class);
+                        if(contactVO != null) {
 
-                    ContactVO contactVO = gson.fromJson(jsonResponse.getJsonString(), ContactVO.class);
-                    if(contactVO != null) {
+                            try {
 
-                        try {
+                                ContentValues values = new ContentValues();
+                                values.put("name", contactVO.getConame());
+                                values.put("number", contactVO.getConumber());
+                                values.put("sharelocation", contactVO.isCosharelocation());
+                                values.put("allowtrace", contactVO.isCoallowtrace());
+                                values.put("status", contactVO.getCostatus());
+                                values.put("version", contactVO.getCoversion());
 
-                            ContentValues values = new ContentValues();
-                            values.put("name", contactVO.getConame());
-                            values.put("number", contactVO.getConumber());
-                            values.put("sharelocation", contactVO.isCosharelocation());
-                            values.put("allowtrace", contactVO.isCoallowtrace());
-                            values.put("status", contactVO.getCostatus());
-                            values.put("version", contactVO.getCoversion());
+                                if (contactIdPhone != null) {
+                                    values.put("contactidphone", contactIdPhone);
+                                }
 
-                            if (contactIdPhone != null) {
-                                values.put("contactidphone", contactIdPhone);
+                                if (database.update(Contact.TABLE_NAME, values, "_id=" + contactExist.getId(), null) > 0) {
+                                    Log.i(LOG_CLASS, "refreshData OK: " + contactExist.getId());
+                                } else {
+                                    Log.i(LOG_CLASS, "refreshData ERRO : " + contactExist.getId());
+                                }
+
+                            } catch (Exception e) {
+                                Log.e(LOG_CLASS, "Erro no metodo saveAllWS no BD:" + e.getMessage());
                             }
 
-                            if (database.update(Contact.TABLE_NAME, values, "_id=" + contactExist.getId(), null) > 0) {
-                                Log.i(LOG_CLASS, "refreshData OK: " + contactExist.getId());
-                            } else {
-                                Log.i(LOG_CLASS, "refreshData ERRO : " + contactExist.getId());
+                            if (contactVO.getCostatus() == ContactAux.STATUS_ACTIVE) {
+                                Log.i(LOG_CLASS, "Imagem: " + c.getName());
+                                getImageProfile(contactVO.getConumber());
                             }
 
-                        } catch (Exception e) {
-                            Log.e(LOG_CLASS, "Erro no metodo saveAllWS no BD:" + e.getMessage());
+                        }else{
+                            Log.e(LOG_CLASS, "Contato não foi encontrado...");
                         }
 
-                        if (contactVO.getCostatus() == ContactAux.STATUS_ACTIVE) {
-                            getImageProfile(contactVO.getConumber());
-                            Log.e(LOG_CLASS, "Imagem: " + c.getName());
-                        }
-
-                    }else{
-                        Log.e(LOG_CLASS, "Contato não foi encontrado...");
                     }
 
                 }
@@ -158,20 +145,11 @@ public class ContactControler {
 
                     for (Contact c : lsContacts) {
 
-                        String response = WhistleJson.makeRequest("contact/getContactNumber/" + userVO.getUsidentification() + "/" + c.getNumber());
-                        //Log.i(LOG_CLASS, "checkUpdateContacts response = " + response);
+                        JsonResponse jsonResponse = WhistleJson.makeRequest("contact/getContactNumber/" + userVO.getUsidentification() + "/" + c.getNumber());
+                        if(jsonResponse.getStatus() == 200){
 
-                        if (response != null && !response.equals("")) {
-
-                            GsonBuilder builder = new GsonBuilder();
-                            builder.registerTypeAdapter(Date.class, new JsonDeserializer() {
-                                public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                                    return new Date(json.getAsJsonPrimitive().getAsLong());
-                                }
-                            });
-
-                            Gson gson = builder.create();
-                            ContactVO contactVO = gson.fromJson(response, ContactVO.class);
+                            Gson gson = WhistleGsonBuilder.timestampToDate();
+                            ContactVO contactVO = gson.fromJson(jsonResponse.getJsonString(), ContactVO.class);
                             if (contactVO != null) {
 
                                 if (c.getVersion() != contactVO.getCoversion()) {
@@ -249,24 +227,18 @@ public class ContactControler {
                 Gson gson = new Gson();
                 String json = gson.toJson(contactVO);
 
-                String response = WhistleJson.sendPost("contact", "editShareLocation", json);
-                if(response != null && !response.equals("")) {
+                JsonResponse jsonResponse = WhistleJson.sendPost("contact", "editShareLocation", json);
+                if(jsonResponse.getStatus() == 200){
 
-                    ReturnRSVO returnRSVO = gson.fromJson(response, ReturnRSVO.class);
-                    if (returnRSVO != null && returnRSVO.getMsg().equals(TypeReturnRSVO.OK)) {
-
-                        try {
-                            //db = whistleBD.getWritableDatabase();
-                            ContentValues values = new ContentValues();
-                            values.put("sharelocation", shareLocation);
-                            database.update(Contact.TABLE_NAME, values, "number=" + contact.getNumber(), null);
-                        }catch (Exception e){
-                        }
-
-                        //refreshData(contact);
-                        return shareLocation;
-
+                    try {
+                        ContentValues values = new ContentValues();
+                        values.put("sharelocation", shareLocation);
+                        database.update(Contact.TABLE_NAME, values, "number=" + contact.getNumber(), null);
+                    }catch (Exception e){
                     }
+
+                    return shareLocation;
+
                 }
             }
 
@@ -293,22 +265,17 @@ public class ContactControler {
                 Gson gson = new Gson();
                 String json = gson.toJson(contactVO);
 
-                String response = WhistleJson.sendPost("contact", "editAllowtrace", json);
+                JsonResponse jsonResponse = WhistleJson.sendPost("contact", "editAllowtrace", json);
+                if(jsonResponse.getStatus() == 200){
 
-                if(response != null && !response.equals("")) {
-
-                    ReturnRSVO returnRSVO = gson.fromJson(response, ReturnRSVO.class);
-                    if (returnRSVO != null && returnRSVO.getMsg().equals(TypeReturnRSVO.OK)) {
-
-                        try {
-                            //db = whistleBD.getWritableDatabase();
-                            ContentValues values = new ContentValues();
-                            values.put("allowtrace", allowtrace);
-                            database.update(Contact.TABLE_NAME, values, "number=" + contact.getNumber(), null);
-                            return allowtrace;
-                        }catch (Exception e){
-                        }
+                    try {
+                        ContentValues values = new ContentValues();
+                        values.put("allowtrace", allowtrace);
+                        database.update(Contact.TABLE_NAME, values, "number=" + contact.getNumber(), null);
+                        return allowtrace;
+                    }catch (Exception e){
                     }
+
                 }
             }
 
@@ -323,16 +290,14 @@ public class ContactControler {
     public String getImageProfile(String number){
         try {
 
-            String jsonString = WhistleJson.makeRequest("contact/getImageProfile/" + number);
-            Log.i(LOG_CLASS, "getImageProfile response = " + jsonString);
-
-            if(jsonString != null && !jsonString.equals("")) {
+            JsonResponse jsonResponse = WhistleJson.makeRequest("contact/getImageProfile/" + number);
+            if(jsonResponse.getStatus() == 200){
 
                 Gson gson = new Gson();
-                ImageUploadVO img = gson.fromJson(jsonString, ImageUploadVO.class);
+                ImageUploadVO img = gson.fromJson(jsonResponse.getJsonString(), ImageUploadVO.class);
 
                 if (img != null) {
-                    Log.i(LOG_CLASS, "Imagem OK");
+                    Log.i(LOG_CLASS, "Imagem OK: " + number);
 
                     String url = WhistleUtils.saveImage(img.getImgArray(), "imgContact" + number);
                     Log.i(LOG_CLASS, "url = " + url);
@@ -340,7 +305,6 @@ public class ContactControler {
                     if(url != null){
 
                         try {
-                            //db = whistleBD.getWritableDatabase();
                             ContentValues values = new ContentValues();
                             values.put("urlimage", url);
                             database.update(Contact.TABLE_NAME, values, "number=" + number, null);
@@ -352,28 +316,23 @@ public class ContactControler {
 
                     }
 
-                    return null;
-
                 }else{
                     Log.i(LOG_CLASS, "Imagem NULL");
                 }
 
             }
 
-            return null;
-
         }catch (Exception e){
             Log.e(LOG_CLASS, "Erro no metodo getImageProfile: " + e.getMessage());
-            return null;
         }
+
+        return null;
     }
 
     public Contact findContactById(int id) {
         Cursor cursor = null;
         Contact contact = null;
         try{
-
-            //db = whistleBD.getReadableDatabase();
 
             String where = "_id = ?";
             String argumentos[] = new String[] { String.valueOf(id) };
@@ -400,8 +359,6 @@ public class ContactControler {
         Cursor cursor = null;
         Contact contact = null;
         try{
-
-            //db = whistleBD.getReadableDatabase();
 
             String where = "number = ?";
             String argumentos[] = new String[] { number };
@@ -455,8 +412,6 @@ public class ContactControler {
         Cursor cursor = null;
         int count = -1;
         try{
-
-            //db = whistleBD.getReadableDatabase();
 
             cursor = database.rawQuery("select count(*) from " + Contact.TABLE_NAME + " where number = '" + number + "'", null);
             if(cursor != null){

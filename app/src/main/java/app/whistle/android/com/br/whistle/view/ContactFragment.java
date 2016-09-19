@@ -17,14 +17,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.brns.whistle.backend.protocol.vo.entity.LocalizationVO;
+
 import java.util.ArrayList;
 import java.util.List;
-
 import app.whistle.android.com.br.whistle.R;
 import app.whistle.android.com.br.whistle.control.ControlerFactoryMethod;
 import app.whistle.android.com.br.whistle.entity.Contact;
 import app.whistle.android.com.br.whistle.thread.RefreshDataContact;
-import br.com.brns.whistle.protocol.vo.entity.LocalizationVO;
 
 /**
  * Created by rafael on 09/03/2016.

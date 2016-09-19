@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.brns.whistle.backend.protocol.vo.entity.UserVO;
+
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +19,6 @@ import app.whistle.android.com.br.whistle.entity.Contact;
 import app.whistle.android.com.br.whistle.entity.User;
 import app.whistle.android.com.br.whistle.thread.ThreadPool;
 import app.whistle.android.com.br.whistle.utils.WhistleUtils;
-import br.com.brns.whistle.protocol.vo.entity.UserVO;
 
 /**
  * Created by rafael on 07/04/2016.

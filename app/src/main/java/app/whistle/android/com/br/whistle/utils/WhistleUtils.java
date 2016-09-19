@@ -13,6 +13,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Base64;
 import android.util.Log;
 
+import com.brns.whistle.backend.protocol.vo.entity.UserVO;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 
@@ -23,11 +24,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import app.whistle.android.com.br.whistle.R;
 import app.whistle.android.com.br.whistle.entity.User;
 import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
-import br.com.brns.whistle.protocol.vo.entity.UserVO;
 
 /**
  * Created by rafael on 03/12/2015.
@@ -64,6 +62,7 @@ public class WhistleUtils {
                 userVO.setUsidentification(u.getIdentification());
                 userVO.setUsnumber(u.getNumber());
                 userVO.setUsprefix(u.getPrefix());
+                userVO.setUsnumberfull(u.getCodecountry() + u.getPrefix() + u.getNumber());
             }
 
             return userVO;

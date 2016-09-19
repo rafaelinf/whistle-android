@@ -1,25 +1,12 @@
 package app.whistle.android.com.br.whistle.singleton;
 
 import android.content.Context;
-import android.content.Intent;
-import android.location.Location;
-import android.os.Handler;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.View;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import com.brns.whistle.backend.protocol.vo.entity.LocalizationVO;
 import java.util.ArrayList;
 import java.util.List;
-
 import app.whistle.android.com.br.whistle.control.ControlerFactoryMethod;
-import app.whistle.android.com.br.whistle.entity.User;
-import app.whistle.android.com.br.whistle.location.GPSTracker;
-import app.whistle.android.com.br.whistle.service.UploadLocalizationService;
-import app.whistle.android.com.br.whistle.view.LocationFragment;
-import br.com.brns.whistle.protocol.vo.entity.LocalizationVO;
-import br.com.brns.whistle.protocol.vo.entity.UserVO;
 
 /**
  * Created by rafael on 09/12/2015.
@@ -34,6 +21,7 @@ public class WhistleSingleton {
     public final static String TOKEN_MAPBOX = "pk.eyJ1IjoicmFmYWVsaW5mIiwiYSI6ImNpbHk0enFmdDA4ODh2OWtzYmJlcWs4cTQifQ.wgXzsHewmj_PqzZt5Fuklg";
 
     //public final static String URL_WHISTLE_WS = "http://api.whistle-message.com:8080/whistle-comm-ws/";
+    //public final static String URL_WHISTLE_WS = "http://192.168.0.103:8080/whistle-backend-ws/";
     public final static String URL_WHISTLE_WS = "http://192.168.43.94:8080/whistle-backend-ws/";
     //public final static String URL_WHISTLE_WS = "http://192.168.0.56:8080/whistle-comm-ws/";
     //public final static String URL_WHISTLE_WS = "http://192.168.0.101:8080/whistle-comm-ws/";

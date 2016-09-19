@@ -1,28 +1,14 @@
 package app.whistle.android.com.br.whistle.thread;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
-
-import java.io.File;
 import java.util.List;
-
 import app.whistle.android.com.br.whistle.R;
 import app.whistle.android.com.br.whistle.control.ControlerFactoryMethod;
 import app.whistle.android.com.br.whistle.entity.Contact;
 import app.whistle.android.com.br.whistle.entity.User;
-import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
-import app.whistle.android.com.br.whistle.utils.WhistleUtils;
 import app.whistle.android.com.br.whistle.view.ContactFragment;
-import br.com.brns.whistle.protocol.vo.rest.ReturnRSVO;
-import br.com.brns.whistle.protocol.vo.rest.TypeReturnRSVO;
 
 /**
  * Created by rafael on 09/03/2016.

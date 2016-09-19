@@ -1,18 +1,11 @@
 package app.whistle.android.com.br.whistle.control;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
-
-import com.google.gson.Gson;
-
-import app.whistle.android.com.br.whistle.entity.Contact;
+import app.whistle.android.com.br.whistle.auxiliary.JsonResponse;
 import app.whistle.android.com.br.whistle.entity.User;
-import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
 import app.whistle.android.com.br.whistle.utils.WhistleJson;
 import app.whistle.android.com.br.whistle.utils.WhistleUtils;
-import br.com.brns.whistle.protocol.vo.rest.ReturnRSVO;
-import br.com.brns.whistle.protocol.vo.rest.TypeReturnRSVO;
 
 /**
  * Created by rafael on 23/01/2016.
@@ -62,9 +55,13 @@ public class ConfigControler {
     public boolean wsKeepAliveComm(User user){
         try {
 
-            String jsonString = WhistleJson.makeRequest("keepAliveComm/" + user.getIdentification());
-            Log.i(LOG_CLASS, "Response wsKeepAliveComm = " + jsonString);
-            return true;
+            JsonResponse jsonResponse = WhistleJson.makeRequest("keepAliveComm/" + user.getIdentification());
+            if(jsonResponse.getStatus() == 200){
+                Log.i(LOG_CLASS, "Response wsKeepAliveComm = " + jsonResponse.getJsonString());
+                return true;
+            }else{
+                return false;
+            }
 
         }catch (Exception e){
             Log.e(LOG_CLASS, "wsKeepAliveComm - " + e.getMessage());

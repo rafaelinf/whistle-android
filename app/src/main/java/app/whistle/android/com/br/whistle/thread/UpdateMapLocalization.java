@@ -1,17 +1,16 @@
 package app.whistle.android.com.br.whistle.thread;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.brns.whistle.backend.protocol.vo.entity.LocalizationVO;
+
 import java.util.List;
-import app.whistle.android.com.br.whistle.R;
+
 import app.whistle.android.com.br.whistle.control.ControlerFactoryMethod;
-import app.whistle.android.com.br.whistle.entity.Contact;
 import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
 import app.whistle.android.com.br.whistle.view.LocationFragment;
-import br.com.brns.whistle.protocol.vo.entity.LocalizationVO;
 
 /**
  * Created by rafael on 18/03/2016.

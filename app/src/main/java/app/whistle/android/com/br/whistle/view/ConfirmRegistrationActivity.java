@@ -16,9 +16,6 @@ import android.widget.Toast;
 import app.whistle.android.com.br.whistle.R;
 import app.whistle.android.com.br.whistle.control.ControlerFactoryMethod;
 import app.whistle.android.com.br.whistle.entity.User;
-import br.com.brns.whistle.protocol.vo.entity.UserVO;
-import br.com.brns.whistle.protocol.vo.rest.ReturnRSVO;
-import br.com.brns.whistle.protocol.vo.rest.TypeReturnRSVO;
 
 
 /**

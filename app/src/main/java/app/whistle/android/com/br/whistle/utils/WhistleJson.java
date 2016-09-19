@@ -22,6 +22,7 @@ public class WhistleJson {
 
     private static final String LOG_CLASS = "WhistleJson";
 
+/*
     @Deprecated
     public static String makeRequest(String urlAddress) {
 
@@ -90,30 +91,46 @@ public class WhistleJson {
     }
 
     ////////////////////////////////////////////////////////
+*/
 
-    public static HttpURLConnection makeRequest_(String urlAddress) {
-
-        String urlFull = WhistleSingleton.URL_WHISTLE_WS + urlAddress;
-        //Log.i(LOG_CLASS, "urlFull 1 = " + urlFull);
-
-        urlFull = urlFull.replaceAll(" ", "%20");
-        //Log.i(LOG_CLASS, "urlFull 2 = " + urlFull);
-
-        HttpURLConnection con = null;
-        URL url = null;
-        String response = null;
+    public static JsonResponse makeRequest(String urlAddress) {
         try {
-            url = new URL(urlFull);
-            con = (HttpURLConnection) url.openConnection();
+
+            String urlFull = WhistleSingleton.URL_WHISTLE_WS + urlAddress;
+            urlFull = urlFull.replaceAll(" ", "%20");
+
+            URL url = new URL(urlFull);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             //response = readStream(con.getInputStream());
+
+            int responseCode = urlConnection.getResponseCode();
+            //System.out.println("Response Code : " + responseCode);
+
+            StringBuffer response = new StringBuffer();
+            if(responseCode == 200){
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                //print result
+                System.out.println(response.toString());
+
+            }
+
+            return new JsonResponse(responseCode, response.toString());
+
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            con.disconnect();
+            return null;
         }
-        return con;
     }
 
+/*
     public static HttpURLConnection sendPost_(String restPath, String urlAddress, String json){
         HttpURLConnection urlConnection = null;
         URL url = null;
@@ -152,21 +169,21 @@ public class WhistleJson {
 
         return urlConnection;
     }
+*/
 
     public static String readStream(InputStream in) {
         BufferedReader reader = null;
         StringBuilder builder = new StringBuilder();
         try {
+
             reader = new BufferedReader(new InputStreamReader(in));
             String line = null;
             while ((line = reader.readLine()) != null) {
                 builder.append(line + "\n");
             }
+
         } catch (IOException e) {
             e.printStackTrace();
-
-
-
         } finally {
             if (reader != null) {
                 try {
@@ -174,16 +191,13 @@ public class WhistleJson {
                 }catch(IOException e){
                     e.printStackTrace();
                 }
-
             }
         }
 
         return builder.toString();
     }
 
-    //////////////////////////////////////////////////////////
-
-    public static JsonResponse sendPost___(String restPath, String urlAddress, String json) {
+    public static JsonResponse sendPost(String restPath, String urlAddress, String json) {
         HttpURLConnection urlConnection = null;
         URL url = null;
 
@@ -206,7 +220,6 @@ public class WhistleJson {
             wr.close();
 
             int responseCode = urlConnection.getResponseCode();
-            System.out.println("Response Code : " + responseCode);
 
             StringBuffer response = new StringBuffer();
             if(responseCode == 200){

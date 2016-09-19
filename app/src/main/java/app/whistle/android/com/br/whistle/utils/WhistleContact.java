@@ -5,19 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.util.Log;
-
+import com.brns.whistle.backend.protocol.vo.entity.UserVO;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import app.whistle.android.com.br.whistle.auxiliary.ContactMobileVO;
-import app.whistle.android.com.br.whistle.entity.Contact;
-import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
-import br.com.brns.whistle.protocol.auxiliary.ContactAux;
-import br.com.brns.whistle.protocol.vo.entity.ContactVO;
-import br.com.brns.whistle.protocol.vo.entity.UserVO;
 
 /**
  * Created by rafael on 27/01/2016.
@@ -48,6 +41,8 @@ public class WhistleContact {
 
                         while (pCur.moveToNext()) {
                             String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                            Log.i(LOG_CLASS, "phoneNo = " + phoneNo);
 
                             ContactMobileVO c = new ContactMobileVO(id, name, phoneNo);
                             lsContactVOs.add(c);

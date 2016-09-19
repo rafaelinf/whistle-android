@@ -37,4 +37,5 @@
     <string name="country">País</string>
     <string name="selectCountry">Selecione o País</string>
     <string name="pleaseSelectCountryOrigin">Por favor, selecione o país de origem</string>
+    <string name="msg_couldNotChangeImage">Não foi possível alterar a imagem</string>
 </resources>

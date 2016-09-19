@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.brns.whistle.backend.protocol.vo.entity.LocalizationVO;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -37,7 +38,6 @@ import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
 import app.whistle.android.com.br.whistle.thread.RefreshDataContact;
 import app.whistle.android.com.br.whistle.thread.UpdateMapLocalization;
 import app.whistle.android.com.br.whistle.utils.WhistleUtils;
-import br.com.brns.whistle.protocol.vo.entity.LocalizationVO;
 
 /**
  * Created by rafael on 09/03/2016.

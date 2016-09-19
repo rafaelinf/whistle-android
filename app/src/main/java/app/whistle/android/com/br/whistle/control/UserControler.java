@@ -9,15 +9,10 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.brns.whistle.backend.protocol.vo.entity.*;
 import com.google.gson.Gson;
-
-import org.json.JSONObject;
-
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.net.HttpURLConnection;
 import java.util.Date;
-
 import app.whistle.android.com.br.whistle.auxiliary.JsonResponse;
 import app.whistle.android.com.br.whistle.database.WhistleBD;
 import app.whistle.android.com.br.whistle.entity.User;
@@ -25,11 +20,6 @@ import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
 import app.whistle.android.com.br.whistle.utils.WhistleImage;
 import app.whistle.android.com.br.whistle.utils.WhistleJson;
 import app.whistle.android.com.br.whistle.utils.WhistleUtils;
-import br.com.brns.whistle.protocol.vo.entity.ImageUploadVO;
-import br.com.brns.whistle.protocol.vo.entity.UserVO;
-import br.com.brns.whistle.protocol.vo.rest.LevelRSVO;
-import br.com.brns.whistle.protocol.vo.rest.ReturnRSVO;
-import br.com.brns.whistle.protocol.vo.rest.TypeReturnRSVO;
 
 /**
  * Created by rafael on 02/12/2015.
@@ -53,30 +43,22 @@ public class UserControler {
 
             String registrationCode = WhistleUtils.generateValueAlphaNumber(4);
 
-            HttpURLConnection response = WhistleJson.makeRequest_("user/registrationRequest/" + registrationCode + "/" + identification + "/" + codeCountry + "/" + prefix + "/" + number + "/" + name + "/" + email);
-            if(response != null) {
+            JsonResponse jsonResponse = WhistleJson.makeRequest("user/registrationRequest/" + registrationCode + "/" + identification + "/" + codeCountry + "/" + prefix + "/" + number + "/" + name + "/" + email);
+            if(jsonResponse.getStatus() == 200){
 
-                //Log.i(LOG_CLASS, "response = " + WhistleJson.readStream(response.getInputStream()));
+                User user = new User();
+                user.setIdentification(identification);
+                user.setName(name);
+                user.setCodecountry(codeCountry);
+                user.setPrefix(prefix);
+                user.setNumber(number);
+                user.setEmail(email);
+                user.setDtcreate(new Date());
+                user.setRegistrationcode(registrationCode);
 
-                //Gson gson = new Gson();
-                //UserVO JsonResponse = gson.fromJson(WhistleJson.readStream(response.getInputStream()), UserVO.class);
-
-                if(response.getResponseCode() == 200){
-
-                    User user = new User();
-                    user.setIdentification(identification);
-                    user.setName(name);
-                    user.setCodecountry(codeCountry);
-                    user.setPrefix(prefix);
-                    user.setNumber(prefix + number);
-                    user.setEmail(email);
-                    user.setDtcreate(new Date());
-                    user.setRegistrationcode(registrationCode);
-
-                    boolean success = save(user);
-                    if(success){
-                        return true;
-                    }
+                boolean success = save(user);
+                if(success){
+                    return true;
                 }
             }
 
@@ -88,46 +70,34 @@ public class UserControler {
     }
 
     public boolean confirmRegistration(User user, String registrationcode){
-        HttpURLConnection response = null;
-        UserVO userVO = null;
-
         try {
 
-            response = WhistleJson.makeRequest_("user/confirmRegistration/" + registrationcode + "/" + user.getIdentification());
-            if(response != null){
+            JsonResponse jsonResponse = WhistleJson.makeRequest("user/confirmRegistration/" + registrationcode + "/" + user.getIdentification());
+            if(jsonResponse.getStatus() == 200){
 
-                if(response.getResponseCode() == 200){
+                User userConfirm = findUser();
+                if(userConfirm != null){
 
-                    //Gson gson = new Gson();
-                    //userVO = gson.fromJson(WhistleJson.readStream(response.getInputStream()), UserVO.class);
+                    userConfirm.setDtactive(new Date());
+                    userConfirm.setStatus(100);
 
-                    User userConfirm = findUser();
-                    if(userConfirm != null){
+                    boolean success = edit(userConfirm);
+                    if(success){
 
-                        userConfirm.setDtactive(new Date());
-                        userConfirm.setStatus(100);
-
-                        boolean success = edit(userConfirm);
-                        if(success){
-
-                            Log.i(LOG_CLASS, "Usuário ativado com sucesso.");
-                            return true;
-
-                        }else{
-                            Toast.makeText(WhistleSingleton.getInstance().getContext(), "Erro ao ativar usuário", Toast.LENGTH_SHORT).show();
-                            Log.i(LOG_CLASS, "Erro ao ativar usuário.");
-                        }
+                        Log.i(LOG_CLASS, "Usuário ativado com sucesso.");
+                        return true;
 
                     }else{
-                        Log.i(LOG_CLASS, "Usuário não encontrado");
+                        Toast.makeText(WhistleSingleton.getInstance().getContext(), "Erro ao ativar usuário", Toast.LENGTH_SHORT).show();
+                        Log.i(LOG_CLASS, "Erro ao ativar usuário.");
                     }
 
                 }else{
-                    Log.i(LOG_CLASS, "Erro no metodo response.getResponseCode()");
+                    Log.i(LOG_CLASS, "Usuário não encontrado");
                 }
 
             }else{
-                Log.i(LOG_CLASS, "Não foi confirmado");
+                Log.i(LOG_CLASS, "Erro no metodo response.getResponseCode()");
             }
 
         }catch (Exception e){
@@ -139,7 +109,7 @@ public class UserControler {
 
     }
 
-    public ReturnRSVO editImageProfile(Bitmap bitmap){
+    public boolean editImageProfile(Bitmap bitmap){
         try {
 
             if(bitmap != null){
@@ -156,53 +126,44 @@ public class UserControler {
                 Gson gson = new Gson();
                 String json = gson.toJson(imageUploadVO);
 
-                String response = WhistleJson.sendPost("user", "editImageProfile", json);
-                Log.i(LOG_CLASS, "response = " + response);
+                JsonResponse jsonResponse = WhistleJson.sendPost("user", "editImageProfile", json);
+                if(jsonResponse.getStatus() == 200){
 
-                if(response != null && !response.equals("")){
+                    WhistleImage whistleImage = new WhistleImage(WhistleSingleton.getInstance().getContext());
+                    String url = whistleImage.saveImage(bitmap, "imgUserProfile");
 
-                    ReturnRSVO returnRSVO = gson.fromJson(response, ReturnRSVO.class);
-                    if(returnRSVO != null && returnRSVO.getMsg().equals(TypeReturnRSVO.OK)){
-
-                        WhistleImage whistleImage = new WhistleImage(WhistleSingleton.getInstance().getContext());
-                        String url = whistleImage.saveImage(bitmap, "imgUserProfile");
-
-                        try {
-                            db = whistleBD.getWritableDatabase();
-                            ContentValues values = new ContentValues();
-                            values.put("urlImageProfile", url);
-                            db.update(User.TABLE_NAME, values, "_id=" + user.getId(), null);
-                        }catch (Exception e){
-                            return new ReturnRSVO(LevelRSVO.LEVEL_INFO, "Erro no metodo editImageProfile: " + e.getMessage());
-                        }
-
+                    try {
+                        db = whistleBD.getWritableDatabase();
+                        ContentValues values = new ContentValues();
+                        values.put("urlImageProfile", url);
+                        db.update(User.TABLE_NAME, values, "_id=" + user.getId(), null);
+                    }catch (Exception e){
+                        return false;
                     }
 
-                    return returnRSVO;
+                    return true;
 
-                }else{
-                    Log.i(LOG_CLASS, "Erro de comunicação");
-                    return new ReturnRSVO(LevelRSVO.LEVEL_WARN, "Erro de comunicação");
+                }else {
+                    return false;
                 }
 
             }else{
                 Log.i(LOG_CLASS, "A imagem é obrigatória");
-                return new ReturnRSVO(LevelRSVO.LEVEL_WARN, "A imagem é obrigatória");
+                return false;
             }
 
         }catch (Exception e){
             Log.e(LOG_CLASS, "Erro no metodo editImageProfile: " + e.getMessage());
-            return new ReturnRSVO(LevelRSVO.LEVEL_INFO, "Erro no metodo editImageProfile: " + e.getMessage());
+            return false;
         }
     }
-
-
 
     public boolean save(User user){
         try {
             db = whistleBD.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put("identification", user.getIdentification());
+            values.put("codecountry", user.getCodecountry());
             values.put("prefix", user.getPrefix());
             values.put("number", user.getNumber());
             values.put("name", user.getName());
@@ -274,7 +235,7 @@ public class UserControler {
                     User user = new User();
                     user.setId(Integer.parseInt(cursor.getString(0)));
                     user.setIdentification(cursor.getString(1));
-                    //user.setCodecountry(cursor.getString(2));
+                    user.setCodecountry(cursor.getString(2));
                     user.setPrefix(cursor.getString(3));
                     user.setNumber(cursor.getString(4));
                     user.setName(cursor.getString(5));

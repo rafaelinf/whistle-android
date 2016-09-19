@@ -2,16 +2,12 @@ package app.whistle.android.com.br.whistle.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.location.Location;
 import android.os.IBinder;
 import android.util.Log;
-
+import com.brns.whistle.backend.protocol.vo.entity.LocalizationVO;
 import java.util.List;
-
 import app.whistle.android.com.br.whistle.control.ControlerFactoryMethod;
-import app.whistle.android.com.br.whistle.location.GPSTracker;
 import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
-import br.com.brns.whistle.protocol.vo.entity.LocalizationVO;
 
 /**
  * Created by rafael on 23/03/2016.

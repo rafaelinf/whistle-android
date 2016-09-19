@@ -2,9 +2,8 @@ package app.whistle.android.com.br.whistle.control;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
 import android.util.Log;
-
+import com.brns.whistle.backend.protocol.vo.entity.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -15,22 +14,16 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import app.whistle.android.com.br.whistle.auxiliary.JsonResponse;
 import app.whistle.android.com.br.whistle.database.WhistleBD;
 import app.whistle.android.com.br.whistle.entity.Contact;
 import app.whistle.android.com.br.whistle.entity.User;
-import app.whistle.android.com.br.whistle.singleton.WhistleSingleton;
 import app.whistle.android.com.br.whistle.utils.WhistleJson;
 import app.whistle.android.com.br.whistle.utils.WhistleUtils;
-import br.com.brns.whistle.protocol.vo.entity.ContactVO;
-import br.com.brns.whistle.protocol.vo.entity.LocalizationVO;
-import br.com.brns.whistle.protocol.vo.entity.UserVO;
-import br.com.brns.whistle.protocol.vo.rest.ReturnRSVO;
-import br.com.brns.whistle.protocol.vo.rest.TypeReturnRSVO;
 
 /**
  * Created by rafael on 17/03/2016.
@@ -74,19 +67,12 @@ public class LocalizationControler {
 
                     Gson gson = new Gson();
                     String json = gson.toJson(localizationJson);
-                    //Log.i(LOG_CLASS, "json localização = " + json);
 
-                    String response = WhistleJson.sendPost("localization", "save", json);
-                    //Log.i(LOG_CLASS, "response localização = " + response);
-
-                    if(response != null) {
-
-                        ReturnRSVO returnRSVO = gson.fromJson(response, ReturnRSVO.class);
-                        if (returnRSVO != null && returnRSVO.getMsg().equals(TypeReturnRSVO.OK)) {
-                            Log.i(LOG_CLASS, "A localização foi salva");
-                        } else {
-                            Log.i(LOG_CLASS, "Erro ao salvar localização: " + returnRSVO.getErrorRSVO().getMessage());
-                        }
+                    JsonResponse jsonResponse = WhistleJson.sendPost("localization", "save", json);
+                    if(jsonResponse.getStatus() == 200){
+                        Log.i(LOG_CLASS, "A localização foi salva");
+                    }else{
+                        Log.i(LOG_CLASS, "Erro ao salvar localização: ");
                     }
 
                 }else{
@@ -128,13 +114,11 @@ public class LocalizationControler {
                         String json = gson.toJson(userVO);
                         //Log.i(LOG_CLASS, "json getLocalizationContacts = " + json);
 
-                        String response = WhistleJson.sendPost("localization", "findLocalizationVOByContact", json);
-                        //Log.i(LOG_CLASS, "response getLocalizationContacts = " + response);
-
-                        if(response != null){
+                        JsonResponse jsonResponse = WhistleJson.sendPost("localization", "findLocalizationVOByContact", json);
+                        if(jsonResponse.getStatus() == 200){
 
                             Type listType = new TypeToken<ArrayList<LocalizationVO>>() {}.getType();
-                            lsLocalizationVOs = gson.fromJson(response, listType);
+                            lsLocalizationVOs = gson.fromJson(jsonResponse.getJsonString(), listType);
 
 /*                            if(lsLocalizationVOs != null && !lsLocalizationVOs.isEmpty()){
 
@@ -200,12 +184,10 @@ public class LocalizationControler {
                     String json = gson.toJson(contactVO);
                     Log.i(LOG_CLASS, "json findLocalizationVOByContactUnique = " + json);
 
-                    String response = WhistleJson.sendPost("localization", "findLocalizationVOByContactUnique", json);
-                    Log.i(LOG_CLASS, "response findLocalizationVOByContactUnique = " + response);
+                    JsonResponse jsonResponse = WhistleJson.sendPost("localization", "findLocalizationVOByContactUnique", json);
+                    if(jsonResponse.getStatus() == 200){
 
-                    if(response != null){
-
-                        localizationVO = gson.fromJson(response, LocalizationVO.class);
+                        localizationVO = gson.fromJson(jsonResponse.getJsonString(), LocalizationVO.class);
 /*                        if(localizationVO != null){
 
                             Log.i(LOG_CLASS, "Localização Contato: " + localizationVO.getUserowner().getUsname());

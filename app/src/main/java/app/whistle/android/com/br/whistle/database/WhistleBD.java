@@ -13,7 +13,7 @@ import app.whistle.android.com.br.whistle.entity.User;
 public class WhistleBD extends SQLiteOpenHelper{
 
     private static final String NAME_DB = "whistledb";
-    private static final int VERSAO_DB = 215;
+    private static final int VERSAO_DB = 236;
 
     public WhistleBD(Context ctx){
         super(ctx, NAME_DB, null, VERSAO_DB);
